@@ -20,6 +20,8 @@ export default function AdminDashboard() {
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('course'); // course, chapter, question, student
     const [editId, setEditId] = useState(null); // null if creating, ID if editing
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [readNotifications, setReadNotifications] = useState([]);
 
     // Form inputs
     const [courseForm, setCourseForm] = useState({ title: '', description: '' });
@@ -181,6 +183,56 @@ export default function AdminDashboard() {
         );
     }
 
+    // Compute admin notifications dynamically
+    const notifications = [];
+
+    // 1. New student signups (created in last 3 days)
+    students.forEach(st => {
+        const isNew = st.created_at && (Date.now() - new Date(st.created_at).getTime()) < 3 * 24 * 60 * 60 * 1000;
+        if (isNew) {
+            notifications.push({
+                id: `student_${st.id}`,
+                title: 'New Student Signup!',
+                message: `${st.name} registered for grade "${st.grade}".`,
+                time: st.created_at,
+                icon: '👤'
+            });
+        }
+    });
+
+    // 2. Recent quiz attempt submissions (created in last 3 days)
+    quizAttempts.forEach(attempt => {
+        const isNew = attempt.created_at && (Date.now() - new Date(attempt.created_at).getTime()) < 3 * 24 * 60 * 60 * 1000;
+        if (isNew) {
+            notifications.push({
+                id: `attempt_${attempt.id}`,
+                title: 'Quiz Submission!',
+                message: `${attempt.user?.name || 'A student'} scored ${attempt.percentage}% on ${attempt.quiz?.title || 'the assessment'}.`,
+                time: attempt.created_at,
+                icon: '📝'
+            });
+        }
+    });
+
+    // 3. New chapters added (created in last 3 days)
+    chapters.forEach(ch => {
+        const isNew = ch.created_at && (Date.now() - new Date(ch.created_at).getTime()) < 3 * 24 * 60 * 60 * 1000;
+        if (isNew) {
+            notifications.push({
+                id: `chapter_${ch.id}`,
+                title: 'New Chapter Published!',
+                message: `"${ch.title}" has been successfully added.`,
+                time: ch.created_at,
+                icon: '📚'
+            });
+        }
+    });
+
+    // Sort by created time
+    notifications.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+    const unreadNotifications = notifications.filter(n => !readNotifications.includes(n.id));
+
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-12">
             {/* Top Navigation */}
@@ -196,6 +248,74 @@ export default function AdminDashboard() {
                     >
                         Student Portal
                     </button>
+
+                    {/* Notification Bell */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="p-2 bg-slate-950 hover:bg-slate-855 border border-slate-800 rounded-xl text-slate-350 hover:text-white transition relative"
+                        >
+                            <span className="text-lg">🔔</span>
+                            {unreadNotifications.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-bounce">
+                                    {unreadNotifications.length}
+                                </span>
+                            )}
+                        </button>
+
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-4 z-50 text-left">
+                                <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                                    <h4 className="text-xs font-black text-white uppercase tracking-wider">Recent Activity</h4>
+                                    {unreadNotifications.length > 0 && (
+                                        <button 
+                                            onClick={() => setReadNotifications(notifications.map(n => n.id))}
+                                            className="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold"
+                                        >
+                                            Mark all as read
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
+                                    {notifications.length === 0 ? (
+                                        <p className="text-slate-500 text-center text-xs py-6">No new activity.</p>
+                                    ) : (
+                                        notifications.map((n) => {
+                                            const isUnread = !readNotifications.includes(n.id);
+                                            return (
+                                                <div 
+                                                    key={n.id} 
+                                                    onClick={() => {
+                                                        if (isUnread) setReadNotifications([...readNotifications, n.id]);
+                                                    }}
+                                                    className={`p-2.5 rounded-xl border text-xs cursor-pointer transition ${
+                                                        isUnread 
+                                                            ? 'bg-slate-950/60 border-indigo-500/20 hover:border-indigo-500/35' 
+                                                            : 'bg-slate-950/10 border-slate-900/40 opacity-60'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start space-x-2">
+                                                        <span className="text-sm">{n.icon}</span>
+                                                        <div className="flex-grow">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="font-extrabold text-slate-200">{n.title}</span>
+                                                                {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>}
+                                                            </div>
+                                                            <p className="text-slate-400 mt-0.5 leading-relaxed text-[10px]">{n.message}</p>
+                                                            <span className="text-[9px] text-slate-500 block mt-1">
+                                                                {new Date(n.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <button 
                         onClick={handleLogout} 
                         className="px-4 py-2 text-sm font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition"

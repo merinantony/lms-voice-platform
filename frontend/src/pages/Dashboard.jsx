@@ -12,6 +12,8 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [showCertificate, setShowCertificate] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [readNotifications, setReadNotifications] = useState([]);
     const [currentStudent, setCurrentStudent] = useState(null);
     const navigate = useNavigate();
     
@@ -122,6 +124,33 @@ export default function Dashboard() {
         const isCompleted = completed_chapters.includes(ch.id);
         return isNew && !isCompleted;
     });
+
+    // Compute student notifications
+    const notifications = [];
+    if (course && course.chapters) {
+        course.chapters.forEach(ch => {
+            const isNew = ch.created_at && (Date.now() - new Date(ch.created_at).getTime()) < 3 * 24 * 60 * 60 * 1000;
+            if (isNew) {
+                notifications.push({
+                    id: `chapter_${ch.id}`,
+                    title: 'New Chapter Available!',
+                    message: `"${ch.title}" has been added to the course.`,
+                    time: ch.created_at,
+                    icon: '✨'
+                });
+            }
+        });
+    }
+    if (progress_percentage === 100) {
+        notifications.push({
+            id: 'course_completed',
+            title: 'Course Completed!',
+            message: 'Congratulations! You can now claim your official gold-sealed certificate.',
+            time: new Date().toISOString(),
+            icon: '🏆'
+        });
+    }
+    const unreadNotifications = notifications.filter(n => !readNotifications.includes(n.id));
     const unlockedBadges = [
         {
             id: 'cadet',
@@ -192,6 +221,70 @@ export default function Dashboard() {
                             <p className="text-xs font-extrabold text-slate-200">{currentStudent?.name}</p>
                             <p className="text-[9px] text-slate-450 font-bold uppercase tracking-wider">{currentStudent?.grade}</p>
                         </div>
+                    </div>
+
+                    {/* Notification Bell */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="p-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl text-slate-350 hover:text-white transition relative"
+                        >
+                            <span className="text-lg">🔔</span>
+                            {unreadNotifications.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-bounce">
+                                    {unreadNotifications.length}
+                                </span>
+                            )}
+                        </button>
+
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-4 z-50 text-left">
+                                <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+                                    <h4 className="text-xs font-black text-white uppercase tracking-wider">Latest News</h4>
+                                    {unreadNotifications.length > 0 && (
+                                        <button 
+                                            onClick={() => setReadNotifications(notifications.map(n => n.id))}
+                                            className="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold"
+                                        >
+                                            Mark all as read
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="space-y-2.5 max-h-[250px] overflow-y-auto pr-1">
+                                    {notifications.length === 0 ? (
+                                        <p className="text-slate-500 text-center text-xs py-6">No new notifications.</p>
+                                    ) : (
+                                        notifications.map((n) => {
+                                            const isUnread = !readNotifications.includes(n.id);
+                                            return (
+                                                <div 
+                                                    key={n.id} 
+                                                    onClick={() => {
+                                                        if (isUnread) setReadNotifications([...readNotifications, n.id]);
+                                                    }}
+                                                    className={`p-2.5 rounded-xl border text-xs cursor-pointer transition ${
+                                                        isUnread 
+                                                            ? 'bg-slate-950/60 border-indigo-500/20 hover:border-indigo-500/35' 
+                                                            : 'bg-slate-950/10 border-slate-900/40 opacity-60'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start space-x-2">
+                                                        <span className="text-sm">{n.icon}</span>
+                                                        <div className="flex-grow">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="font-extrabold text-slate-200">{n.title}</span>
+                                                                {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>}
+                                                            </div>
+                                                            <p className="text-slate-400 mt-0.5 leading-relaxed text-[10px]">{n.message}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <button 
