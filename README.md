@@ -6,6 +6,10 @@ An interactive, gamified Learning Management System (LMS) designed for Grades 6â
 
 Here is the visual walkthrough of the platform.
 
+Credentials
+Student Account: merin@test.com / password123
+Admin Account: admin@test.com / password123
+
 ### 1. Student Dashboard & Custom Profiles
 *A space-themed student learning center featuring progress tracks, badges, and user customization options.*
 ![Student Dashboard](./screenshots/screencapture-localhost-5173-dashboard-2026-07-07-02_18_45.png)
