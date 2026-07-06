@@ -8,19 +8,19 @@ Here is the visual walkthrough of the platform.
 
 ### 1. Student Dashboard & Custom Profiles
 *A space-themed student learning center featuring progress tracks, badges, and user customization options.*
-![Student Dashboard]
+![Student Dashboard](./screenshots/screencapture-localhost-5173-dashboard-2026-07-07-02_18_45.png)
 
 ### 2. Interactive Chapter View
 *Split-screen view with embedded lecture video player, PDF downloads, and real-time AI Tutor voice support.*
-![Chapter View]
+![Chapter View](./screenshots/screencapture-localhost-5173-chapter-2-2026-07-07-02_19_04.png)
 
 ### 3. Gamified Assessments
 *A clean assessment view with randomized questions, accuracy results, and instant celebration confetti.*
-![Quiz Assessments]
+![Quiz Assessments](./screenshots/screencapture-localhost-5173-2026-07-07-02_16_31.png)
 
 ### 4. Admin Management Console
 *CRUD dashboards for managing courses, chapters, questions, student profiles, status toggles, and logs.*
-![Admin Panel]
+![Admin Panel](./screenshots/screencapture-localhost-5173-admin-2026-07-07-02_22_41.png)
 
 ---
 
@@ -108,20 +108,6 @@ graph TD
 * **Core Views**: Separate views for `/dashboard`, `/chapter/:id`, `/quiz/:id`, and protected `/admin`.
 * **State Syncing**: Synchronizes profile data in state and LocalStorage dynamically when updating profiles or uploading image assets.
 * **TTS/STT Integration**: Uses standard browser native APIs (`SpeechSynthesis` & `webkitSpeechRecognition`) in the global `<FloatingChatbot>` and `<AITutor>` components for interactive voice tutoring.
-
----
-
-## 🔑 Default Test Credentials
-
-Use the following accounts to test the different portals:
-
-### 🎓 Student Portal
-* **Email**: `merin@test.com`
-* **Password**: `password123`
-
-### ⚙️ Admin Dashboard
-* **Email**: `admin@test.com`
-* **Password**: `password123`
 
 ---
 
