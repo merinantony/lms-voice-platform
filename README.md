@@ -111,6 +111,20 @@ graph TD
 
 ---
 
+## 🔑 Default Test Credentials
+
+Use the following accounts to test the different portals:
+
+### 🎓 Student Portal
+* **Email**: `merin@test.com`
+* **Password**: `password123`
+
+### ⚙️ Admin Dashboard
+* **Email**: `admin@test.com`
+* **Password**: `password123`
+
+---
+
 ## Installation & Running
 
 ### Prerequisites
